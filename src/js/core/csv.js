@@ -145,7 +145,7 @@ async function loadCsvToTable(config) {
 
         const { records, empty } = parseCsvRecords(csvText, config.headers, config.columns);
 
-        if(empty) showToast(`No records found for <b>${config.tableId}</b>.`, 'warning');
+        //if(empty) showToast(`No records found for <b>${config.tableId}</b>.`, 'warning');
         if(config.populateOptions) config.populateOptions(records);
 
         return records;
@@ -186,6 +186,37 @@ async function writeCsvRecord({ csvPath, headerLine, key, keyIndex, rowValues, m
     return { status: 'added' };
 }
 
+async function writeCsvRecords({ csvPath, headerLine, keyIndex, rows, mode }) {
+    const { normalizedPath, header, rows: existingRows } = await getCsvHeaderAndRows(csvPath, headerLine);
+
+    const results = [];
+
+    for (const { key, rowValues } of rows) {
+        const rowText = rowValues.join(',');
+        const matchIndex = existingRows.findIndex((line) => (line.split(',')[keyIndex] || '').trim() === key);
+
+        if (mode === 'edit') {
+            if (matchIndex === -1) {
+                results.push({ status: 'missing' });
+            } else {
+                existingRows[matchIndex] = rowText;
+                results.push({ status: 'updated' });
+            }
+        } else {
+            if (matchIndex !== -1) {
+                results.push({ status: 'duplicate' });
+            } else {
+                existingRows.push(rowText);
+                results.push({ status: 'added' });
+            }
+        }
+    }
+
+    await Neutralino.filesystem.writeFile(normalizedPath, [header, ...existingRows].join('\n') + '\n');
+
+    return results;
+}
+
 async function deleteCsvRecord({ csvPath, headerLine, key, keyIndex }) {
     const { normalizedPath, header, rows } = await getCsvHeaderAndRows(csvPath, headerLine);
     const remaining = rows.filter((line) => (line.split(',')[keyIndex] || '') !== key);
@@ -218,16 +249,15 @@ async function promptCsvFile() {
 
 async function importCsv(tableId) {
     const config = csvConfigs.find((c) => c.tableId === tableId);
-    if(!config) return;
 
     let csvText;
     try {
         csvText = await promptCsvFile();
     } catch (err) {
-        showImportModal([{ record: '', status: 'error', reason: 'Error reading file' }]);
-        return;
+        return [{ record: '', status: 'error', reason: 'Error reading file' }];
     }
-    if(csvText === null) return false;
+
+    if (csvText === null) return false;
 
     let parsed;
     try {
@@ -235,86 +265,89 @@ async function importCsv(tableId) {
     } catch (err) {
         const msg = err.message || '';
         const reason = msg.startsWith('CSV') ? `Error: ${msg}` : msg;
-        showImportModal([{ record: '', status: 'error', reason }]);
-        return;
+        return [{ record: '', status: 'error', reason }];
     }
 
     const { records, empty } = parsed;
-    if(empty || !Array.isArray(records) || records.length === 0) {
-        showImportModal([{ record: '', status: 'error', reason: 'No records found in import file' }]);
-        return;
+    if (empty || !Array.isArray(records) || records.length === 0) {
+        return [{ record: '', status: 'error', reason: 'No records found in import file' }];
     }
 
-    const { rows: existingRows } = await getCsvHeaderAndRows(config.csvPath, config.headerLine);
-    const existingKeys = new Set(existingRows.map((line) => ((line.split(',')[0] || '').trim())));
+    const [existingResult, refResult] = await Promise.all([
+        getCsvHeaderAndRows(config.csvPath, config.headerLine),
+        tableId === 'studentsTable'
+            ? getCsvHeaderAndRows(csvConfigs[1].csvPath, csvConfigs[1].headerLine)
+            : tableId === 'programsTable'
+                ? getCsvHeaderAndRows(csvConfigs[2].csvPath, csvConfigs[2].headerLine)
+                : Promise.resolve({ rows: [] }),
+    ]);
 
-    const programSet = new Set();
-    const collegeSet = new Set();
-    if(tableId === 'studentsTable') {
-        const { rows: progRows } = await getCsvHeaderAndRows(csvConfigs[1].csvPath, csvConfigs[1].headerLine);
-        progRows.forEach((line) => {
-            const code = (line.split(',')[0] || '').trim();
-            if(code) programSet.add(code);
-        });
-    } else if(tableId === 'programsTable') {
-        const { rows: colRows } = await getCsvHeaderAndRows(csvConfigs[2].csvPath, csvConfigs[2].headerLine);
-        colRows.forEach((line) => {
-            const code = (line.split(',')[0] || '').trim();
-            if(code) collegeSet.add(code);
-        });
-    }
+    const existingKeys = new Set(existingResult.rows.map((l) => (l.split(',')[0] || '').trim()));
+    const refSet = new Set(refResult.rows.map((l) => (l.split(',')[0] || '').trim()).filter(Boolean));
+
+    const duplicateReason = tableId === 'studentsTable' ? 'Student ID already exists' : tableId === 'programsTable' ? 'Program Code already exists' : 'College Code already exists';
 
     const seenInImport = new Set();
     const results = [];
+    const validRows = [];
+    const validIndexMap = [];
 
-    for(const row of records) {
+    for (const row of records) {
         const key = (row[0] || '').trim();
         const recordText = row.join(',');
 
-        if(seenInImport.has(key) || existingKeys.has(key)) {
-            let reason;
-            if(tableId === 'studentsTable') reason = 'Student ID already exists';
-            else if(tableId === 'programsTable') reason = 'Program Code already exists';
-            else if(tableId === 'collegesTable') reason = 'College Code already exists';
-            results.push({ record: recordText, status: 'duplicate', reason });
+        if (seenInImport.has(key) || existingKeys.has(key)) {
+            results.push({ record: recordText, status: 'duplicate', reason: duplicateReason });
             seenInImport.add(key);
             continue;
         }
 
         seenInImport.add(key);
 
-        if(tableId === 'studentsTable') {
-            let progCode = (row[3] || '').trim();
-            if(progCode && progCode.toUpperCase() !== 'NULL' && !programSet.has(progCode)) {
+        if (tableId === 'studentsTable') {
+            const progCode = (row[3] || '').trim();
+            if (progCode && progCode.toUpperCase() !== 'NULL' && !refSet.has(progCode)) {
                 results.push({ record: recordText, status: 'missing', reason: 'Invalid program code' });
                 continue;
             }
-        } else if(tableId === 'programsTable') {
-            let colCode = (row[2] || '').trim();
-            if(colCode && colCode.toUpperCase() !== 'NULL' && !collegeSet.has(colCode)) {
+        } else if (tableId === 'programsTable') {
+            const colCode = (row[2] || '').trim();
+            if (colCode && colCode.toUpperCase() !== 'NULL' && !refSet.has(colCode)) {
                 results.push({ record: recordText, status: 'missing', reason: 'Invalid college code' });
                 continue;
             }
         }
 
+        validIndexMap.push(results.length);
+        results.push(null);
+        validRows.push({ row, recordText });
+    }
+
+    if (validRows.length > 0) {
         try {
             const payload = {
                 csvPath: config.csvPath,
                 headerLine: config.headerLine,
-                key,
                 keyIndex: 0,
-                rowValues: row,
+                rows: validRows.map(({ row }) => ({
+                    key: (row[0] || '').trim(),
+                    rowValues: row,
+                })),
                 mode: 'add',
             };
-            const res = await writeCsvRecord(payload);
-            if(res.status === 'added') {
-                results.push({ record: recordText, status: 'success' });
-                existingKeys.add(key);
-            } else {
-                results.push({ record: recordText, status: 'duplicate' });
-            }
+            const batchRes = await writeCsvRecords(payload);
+
+            batchRes.forEach((res, i) => {
+                const { recordText } = validRows[i];
+                results[validIndexMap[i]] =
+                    res.status === 'added'
+                        ? { record: recordText, status: 'success' }
+                        : { record: recordText, status: 'duplicate' };
+            });
         } catch (err) {
-            results.push({ record: recordText, status: 'error' });
+            validIndexMap.forEach((ri, i) => {
+                results[ri] = { record: validRows[i].recordText, status: 'error' };
+            });
         }
     }
 
