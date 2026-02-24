@@ -199,7 +199,7 @@ function showImportModal(results) {
         { data: 0 },
         { data: 1, orderable: false, searchable: false }
     ], { searching: false, select: false });
-    const modalEl = $('importResultModal');
+    const modalEl = $('#importResultModal');
     const ModalClass = window.bootstrap?.Modal;
     if(ModalClass && modalEl) {
         ModalClass.getOrCreateInstance(modalEl).show();
