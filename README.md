@@ -6,6 +6,15 @@
     </picture>
 </div>
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Neutralino.js-6.5.0-6C63FF?style=flat-square" alt="Neutralino.js">
+  <img src="https://img.shields.io/badge/Bootstrap-5.x-7952B3?style=flat-square&logo=bootstrap&logoColor=white" alt="Bootstrap">
+  <img src="https://img.shields.io/badge/jQuery-3.x-0769AD?style=flat-square&logo=jquery&logoColor=white" alt="jQuery">
+  <img src="https://img.shields.io/badge/DataTables-2.x-1F7EBE?style=flat-square" alt="DataTables">
+  <img src="https://img.shields.io/badge/Moment.js-2.x-orange?style=flat-square" alt="Moment.js">
+  <img src="https://img.shields.io/badge/Heroicons-2.x-8B5CF6?style=flat-square" alt="Heroicons">
+</p>
+
 A lightweight desktop application for managing academic directory records — Students, Programs, and Colleges — backed by local CSV files and delivered via the Neutralino runtime.
 
 <div align="center">
