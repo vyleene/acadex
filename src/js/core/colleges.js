@@ -76,7 +76,7 @@ function openCollegeModal(mode, data = {}) {
 
     const ModalClass = window.bootstrap?.Modal;
     if(ModalClass) {
-        ModalClass.getOrCreateInstance($modal[0]).show();
+        ModalClass.getOrCreateInstance($modal).show();
     }
 }
 
@@ -164,7 +164,7 @@ async function openDeleteCollegeModal(collegeId) {
 
     const ModalClass = window.bootstrap?.Modal;
     if(ModalClass) {
-        ModalClass.getOrCreateInstance($modal[0]).show();
+        ModalClass.getOrCreateInstance($modal).show();
     }
 }
 
@@ -205,7 +205,7 @@ async function openCollegeInfoModal(values) {
 
     const ModalClass = window.bootstrap?.Modal;
     if(ModalClass) {
-        ModalClass.getOrCreateInstance($modal[0]).show();
+        ModalClass.getOrCreateInstance($modal).show();
     }
 
     if(!collegeCode) {

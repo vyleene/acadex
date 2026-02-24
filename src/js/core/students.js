@@ -122,7 +122,7 @@ function openStudentModal(mode, data = {}) {
 
     const ModalClass = window.bootstrap?.Modal;
     if(ModalClass) {
-        ModalClass.getOrCreateInstance($modal[0]).show();
+        ModalClass.getOrCreateInstance($modal).show();
     }
 }
 
@@ -134,7 +134,7 @@ function openDeleteStudentModal(studentId) {
 
     const ModalClass = window.bootstrap?.Modal;
     if(ModalClass) {
-        ModalClass.getOrCreateInstance($modal[0]).show();
+        ModalClass.getOrCreateInstance($modal).show();
     }
 }
 
@@ -181,7 +181,7 @@ function openStudentInfoModal(values) {
 
     const ModalClass = window.bootstrap?.Modal;
     if(ModalClass) {
-        ModalClass.getOrCreateInstance($modal[0]).show();
+        ModalClass.getOrCreateInstance($modal).show();
     }
 }
 

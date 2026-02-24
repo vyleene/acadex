@@ -158,7 +158,7 @@ function showToast(message, variant) {
 
     const ToastClass = window.bootstrap?.Toast;
     if(ToastClass) {
-        const toast = new ToastClass($toastEl[0], { delay: toastDuration, autohide: true });
+        const toast = new ToastClass($toastEl, { delay: toastDuration, autohide: true });
         $toastEl.on('hidden.bs.toast', () => $toastEl.remove());
         toast.show();
     } else {

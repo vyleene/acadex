@@ -90,7 +90,7 @@ function openProgramModal(mode, data = {}) {
 
     const ModalClass = window.bootstrap?.Modal;
     if(ModalClass) {
-        ModalClass.getOrCreateInstance($modal[0]).show();
+        ModalClass.getOrCreateInstance($modal).show();
     }
 }
 
@@ -178,7 +178,7 @@ async function openDeleteProgramModal(programId) {
 
     const ModalClass = window.bootstrap?.Modal;
     if(ModalClass) {
-        ModalClass.getOrCreateInstance($modal[0]).show();
+        ModalClass.getOrCreateInstance($modal).show();
     }
 }
 
@@ -210,7 +210,7 @@ async function openProgramInfoModal(values) {
 
     const ModalClass = window.bootstrap?.Modal;
     if(ModalClass) {
-        ModalClass.getOrCreateInstance($modal[0]).show();
+        ModalClass.getOrCreateInstance($modal).show();
     }
 
     if(!programCode) {
