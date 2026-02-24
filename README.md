@@ -1,4 +1,10 @@
-# 🎓 Acadex
+<div align="center">
+    <picture>
+    <source srcset="docs/logo_dark.png" media="(prefers-color-scheme: dark)">
+    <source srcset="docs/logo_light.png" media="(prefers-color-scheme: light)">
+    <img src="docs/logo_light.png" alt="Acadex logo" width="300">
+    </picture>
+</div>
 
 A lightweight desktop application for managing academic directory records — Students, Programs, and Colleges — backed by local CSV files and delivered via the Neutralino runtime.
 
