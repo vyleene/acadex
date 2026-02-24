@@ -3,41 +3,26 @@ async function initTitleBar() {
     const $themeBtn = $('#btn-theme');
     const $minimizeBtn = $('#btn-minimize');
     const $closeBtn = $('#btn-close');
-    const themeKey = 'ssis-theme';
+    
 
     const excludeButtons = [$themeBtn[0], $minimizeBtn[0], $closeBtn[0]].filter(Boolean);
     if($titleBar.length) Neutralino.window.setDraggableRegion($titleBar[0], { exclude: excludeButtons });
     if($minimizeBtn.length) $minimizeBtn.on('click', async () => Neutralino.window.minimize());
     if($closeBtn.length) $closeBtn.on('click', async () => Neutralino.app.exit());
 
-    const applyTheme = async (theme) => {
-        const safeTheme = theme === 'dark' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-bs-theme', safeTheme);
-        if($themeBtn.length) {
-            const isDark = safeTheme === 'dark';
-            $themeBtn.attr('aria-pressed', isDark ? 'true' : 'false');
-            $themeBtn.attr('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
-        }
-        try {
-            await Neutralino.storage.setData(themeKey, safeTheme);
-        } catch(_) {}
-    };
+    function updateThemeBtn(theme) {
+        const isDark = theme === 'dark';
+        $themeBtn.attr('aria-pressed', isDark ? 'true' : 'false');
+        $themeBtn.attr('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
+    }
 
-    const getInitialTheme = async () => {
-        try {
-            const stored = await Neutralino.storage.getData(themeKey);
-            if(stored === 'light' || stored === 'dark') return stored;
-        } catch(_) {}
-        return 'dark';
-    };
+    if ($themeBtn.length) {
+        updateThemeBtn(document.documentElement.getAttribute('data-bs-theme'));
 
-    await applyTheme(await getInitialTheme());
-    document.documentElement.classList.remove('theme-loading');
-
-    if($themeBtn.length) {
         $themeBtn.on('click', async () => {
             const next = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
             await applyTheme(next);
+            updateThemeBtn(next);
         });
     }
 
@@ -214,7 +199,7 @@ function showImportModal(results) {
         { data: 0 },
         { data: 1, orderable: false, searchable: false }
     ], { searching: false, select: false });
-    const modalEl = document.getElementById('importResultModal');
+    const modalEl = $('importResultModal');
     const ModalClass = window.bootstrap?.Modal;
     if(ModalClass && modalEl) {
         ModalClass.getOrCreateInstance(modalEl).show();
@@ -222,6 +207,8 @@ function showImportModal(results) {
 }
 
 $(document).ready(async () => {
+    $(document).on('contextmenu', (e) => e.preventDefault());
+
     await initTitleBar();
     initDirectoryNav();
 

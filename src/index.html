@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
+    <!-- =========================================================
+         SPLASH SCREEN
+         ========================================================= -->
+    <div id="splash-screen"></div>
 
     <!-- =========================================================
          TITLEBAR
@@ -33,6 +37,10 @@
          ========================================================= -->
     <nav class="app-nav" aria-label="Directory navigation">
         <div class="app-nav__container">
+            <div class="app-nav__logo">
+                <img src="/img/appIcon.ico" width="48" height="48" alt="A" />
+                <span>cadex.</span>
+            </div>
             <button class="app-nav__item is-active" type="button" data-panel="students">
                 <span class="heroicon-url heroicon-url-outline icon-user-group" aria-hidden="true"></span>
                 Student Directory
@@ -674,6 +682,31 @@
         Neutralino.events.on("ready", async () => {
             await Neutralino.window.show();
         });
+
+        const themeKey = 'ssis-theme';
+
+        async function applyTheme(theme) {
+            const safeTheme = theme === 'dark' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-bs-theme', safeTheme);
+            try {
+                await Neutralino.storage.setData(themeKey, safeTheme);
+            } catch(_) {}
+        }
+
+        (async () => {
+            const stored = await Neutralino.storage.getData(themeKey).catch(() => 'dark');
+            const safeTheme = stored === 'light' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-bs-theme', safeTheme);
+            document.documentElement.classList.remove('theme-loading');
+
+            const splash = document.getElementById('splash-screen');
+            if (splash) {
+                await new Promise((resolve) => setTimeout(resolve, 2000));
+
+                splash.classList.add('hide');
+                splash.addEventListener('transitionend', () => splash.remove(), { once: true });
+            }
+        })();
     </script>
 
     <!-- Plugins -->
