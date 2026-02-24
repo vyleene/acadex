@@ -13,6 +13,3 @@ neutralino.d.ts
 .tmp
 .storage
 *.log
-
-# .csv files
-/csv
