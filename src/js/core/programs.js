@@ -300,7 +300,7 @@ $(document).on('submit', '#program-form', async function(event) {
             await reloadStudentTable({ showNullWarning: false });
         }
 
-        const modalEl = document.getElementById('programModal');
+        const modalEl = $('#programModal');
         const modalInstance = modalEl ? window.bootstrap?.Modal?.getInstance(modalEl) : null;
         modalInstance?.hide();
         const studentSuffix = updatedStudentCount
@@ -343,7 +343,7 @@ $(document).on('click', '#confirm-delete-program', async function() {
             await reloadStudentTable({ showNullWarning: false });
         }
 
-        const modalEl = document.getElementById('deleteProgramModal');
+        const modalEl = $('#deleteProgramModal');
         const modalInstance = modalEl ? window.bootstrap?.Modal?.getInstance(modalEl) : null;
         modalInstance?.hide();
         if(updatedCount) {

@@ -278,7 +278,7 @@ $(document).on('submit', '#student-form', async function(event) {
 
         await reloadStudentTable({ showNullWarning: false });
 
-        const modalEl = document.getElementById('studentModal');
+        const modalEl = $('#studentModal');
         const modalInstance = modalEl ? window.bootstrap?.Modal?.getInstance(modalEl) : null;
         modalInstance?.hide();
         const successMessage = mode === 'edit'
@@ -311,7 +311,7 @@ $(document).on('click', '#confirm-delete-student', async function() {
 
         await reloadStudentTable({ showNullWarning: false });
 
-        const modalEl = document.getElementById('deleteStudentModal');
+        const modalEl = $('#deleteStudentModal');
         const modalInstance = modalEl ? window.bootstrap?.Modal?.getInstance(modalEl) : null;
         modalInstance?.hide();
         showToast(`Student <b>${studentId}</b> deleted.`, 'success');

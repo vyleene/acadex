@@ -302,7 +302,7 @@ $(document).on('submit', '#college-form', async function(event) {
             await reloadProgramTable({ showNullWarning: false });
         }
 
-        const modalEl = document.getElementById('collegeModal');
+        const modalEl = $('#collegeModal');
         const modalInstance = modalEl ? window.bootstrap?.Modal?.getInstance(modalEl) : null;
         modalInstance?.hide();
         const programSuffix = updatedProgramCount
@@ -345,7 +345,7 @@ $(document).on('click', '#confirm-delete-college', async function() {
             await reloadProgramTable({ showNullWarning: false });
         }
 
-        const modalEl = document.getElementById('deleteCollegeModal');
+        const modalEl = $('#deleteCollegeModal');
         const modalInstance = modalEl ? window.bootstrap?.Modal?.getInstance(modalEl) : null;
         modalInstance?.hide();
         if(updatedProgramCount) {
